@@ -114,4 +114,5 @@ def get_image(filename):
     return send_from_directory('downloads', filename)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # app.run(debug=True)
+    app.run(host='0.0.0.0', port=80)
