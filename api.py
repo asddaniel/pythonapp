@@ -4,11 +4,35 @@ from validate import validate_request, validate_request_download
 from flask_cors import CORS
 import random
 import string
+import os
+from apscheduler.schedulers.background import BackgroundScheduler
+import time
 
 
 
 app = Flask(__name__)
 CORS(app)
+
+# Initialiser le planificateur
+scheduler = BackgroundScheduler()
+scheduler.start()
+
+# Fonction pour supprimer les fichiers temporaires
+def clean_temp_files():
+    temp_dir = 'downloads/'
+    for filename in os.listdir(temp_dir):
+        file_path = os.path.join(temp_dir, filename)
+        try:
+            # Vérifier si le fichier a été créé il y a plus de 10 minutes
+            if os.path.isfile(file_path) and (time.time() - os.path.getctime(file_path)) > 600:
+                os.remove(file_path)
+        except Exception as e:
+            print(f"Erreur lors de la suppression du fichier {file_path}: {e}")
+
+# Ajouter la tâche planifiée pour nettoyer les fichiers toutes les 10 minutes
+scheduler.add_job(clean_temp_files, 'interval', minutes=10)
+
+
 @app.route('/')
 def hello_world():
     return 'Hello, World!'
